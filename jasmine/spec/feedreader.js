@@ -1,72 +1,104 @@
-/* feedreader.js
- *
- * This is the spec file that Jasmine will read and contains
- * all of the tests that will be run against your application.
- */
+/*****
+feedreader.js
 
-/* We're placing all of our tests within the $() function,
- * since some of these tests may require DOM elements. We want
- * to ensure they don't run until the DOM is ready.
- */
+This file is a spec using Jasmine that tests /js/app.js
+to ensure that it is completely functional.
+
+The code in this file is written by Isabeau Kisler,
+while the other documents are written and provided by Udacity.
+
+10/15
+*****/
+
+// Make sure the DOM is ready before doing any testing
 $(function() {
-    /* This is our first test suite - a test suite just contains
-    * a related set of tests. This suite is all about the RSS
-    * feeds definitions, the allFeeds variable in our application.
-    */
+    // RSS feeds, which are connected to the allFeeds variable in app.js
     describe('RSS Feeds', function() {
-        /* This is our first test - it tests to make sure that the
-         * allFeeds variable has been defined and that it is not
-         * empty. Experiment with this before you get started on
-         * the rest of this project. What happens when you change
-         * allFeeds in app.js to be an empty array and refresh the
-         * page?
-         */
+        // Ensure that the allFeeds variable has been defined and not empty.
         it('are defined', function() {
             expect(allFeeds).toBeDefined();
             expect(allFeeds.length).not.toBe(0);
         });
 
+        // Ensure that each feed has a url and that it is not empty.
+         it('has a URL that is defined and not empty', function() {
+            for(var i=0; i<allFeeds.length; i++) {
+                expect(allFeeds[i].url).toBeDefined();
+                expect(allFeeds[i].url.length).not.toBe(0);
+            }
+         });
 
-        /* TODO: Write a test that loops through each feed
-         * in the allFeeds object and ensures it has a URL defined
-         * and that the URL is not empty.
-         */
-
-
-        /* TODO: Write a test that loops through each feed
-         * in the allFeeds object and ensures it has a name defined
-         * and that the name is not empty.
-         */
+        // Ensure that each feed has a name and is not empty.
+        it('has a name that is defined and not empty', function() {
+            for(var i=0; i<allFeeds.length; i++) {
+                expect(allFeeds[i].name).toBeDefined();
+                expect(allFeeds[i].name.length).not.toBe(0);
+            }
+        });
     });
 
 
-    /* TODO: Write a new test suite named "The menu" */
+    // The menu
+    describe('The menu', function() {
+        // Ensure that the body element starts out with the menu-hidden class attached to it.
+        it('is hidden by default', function() {
+            expect($('body').hasClass('menu-hidden')).toBe(true);
+        });
 
-        /* TODO: Write a test that ensures the menu element is
-         * hidden by default. You'll have to analyze the HTML and
-         * the CSS to determine how we're performing the
-         * hiding/showing of the menu element.
-         */
+        // Ensure that the menu is shown and hidden appropriately when the menu-icon-link is clicked.
+        it('displays when clicked, and hides when clicked again', function() {
+            // Click to open the menu, and check to see if the body element does NOT have the menu-hidden class
+            $('.menu-icon-link').click();
+            expect($('body').hasClass('menu-hidden')).toBe(false);
 
-         /* TODO: Write a test that ensures the menu changes
-          * visibility when the menu icon is clicked. This test
-          * should have two expectations: does the menu display when
-          * clicked and does it hide when clicked again.
-          */
+            // Click to close the menu, and check to see if the body element has the menu-hidden class
+            $('.menu-icon-link').click();
+            expect($('body').hasClass('menu-hidden')).toBe(true);
+        });
 
-    /* TODO: Write a new test suite named "Initial Entries" */
+    });
 
-        /* TODO: Write a test that ensures when the loadFeed
-         * function is called and completes its work, there is at least
-         * a single .entry element within the .feed container.
-         * Remember, loadFeed() is asynchronous so this test wil require
-         * the use of Jasmine's beforeEach and asynchronous done() function.
-         */
+    // Initial entries
+    describe('Initial Entries', function() {
+        // Ensure that, when the feeds are loaded through the loadFeed function, that there are entries.
+        // loadFeed is async
+        beforeEach(function(done) {
+            loadFeed(0, function() {
+                done();
+            });
+        });
 
-    /* TODO: Write a new test suite named "New Feed Selection"
+        it('should have at least one entry', function(done) {
+            expect($('.feed').find('.entry').length).not.toBe(0);
+            done();
+        });
 
-        /* TODO: Write a test that ensures when a new feed is loaded
-         * by the loadFeed function that the content actually changes.
-         * Remember, loadFeed() is asynchronous.
-         */
+    });
+
+    // New feed selection
+    describe('New Feed Selection', function() {
+        // Ensure that a new feed is loaded by checking to see if the content changes between feeds.
+
+        // Create variables to hold the entry content
+        var initialEntries,
+        nextEntries;
+
+        // Before each function, run the next loadFeed iteration, and store those entries in the nextEntries variable.
+        beforeEach(function(done) {
+            loadFeed(1, function(){
+                nextEntries = $('.feed .entry h2').html();
+                done();
+            });
+        });
+
+        // Run the initial loadFeed, store it in the initialEntries variable, and check to see if its entries are equal to the nextEntries.
+        it('should have changing content', function(done) {
+            loadFeed(0, function(){
+                initialEntries = $('.feed .entry h2').html();
+                console.log(initialEntries);
+                expect(nextEntries).not.toEqual(initialEntries);
+                done();
+            });
+        });
+    });
 }());
